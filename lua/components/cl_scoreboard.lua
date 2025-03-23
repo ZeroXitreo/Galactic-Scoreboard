@@ -134,15 +134,22 @@ function component:InitScoreboard()
 			end
 		end
 		pnl.idleRotation = math.cos(RealTime() / 2) * 22.5
+
+		local minBound, maxBound = pnl.Entity:GetModelBounds()
+		local biggestFactor = maxBound.y - minBound.y > maxBound.x - minBound.x and maxBound.y - minBound.y or maxBound.x - minBound.x
+		local scale = 26 / biggestFactor // 26 is default 
+		pnl.Entity:SetModelScale(scale, 0)
+
 		local headPos = Vector(0, 0, 0)
-		if !!(pnl.Entity:LookupBone("ValveBiped.Bip01_Head1") or pnl.Entity:LookupBone("ValveBiped.Bip01_Spine")) then
-			headPos = pnl.Entity:GetBonePosition(pnl.Entity:LookupBone("ValveBiped.Bip01_Head1") or pnl.Entity:LookupBone("ValveBiped.Bip01_Spine"))
+		if pnl.Entity:LookupBone("ValveBiped.Bip01_Head1") then
+			headPos = pnl.Entity:GetBonePosition(pnl.Entity:LookupBone("ValveBiped.Bip01_Head1")) // Scale is taken into account here
+		else
+			headPos.z = maxBound.z
+			headPos.z = headPos.z - 20 // Head offset
+			headPos.z = headPos.z * scale
 		end
-		if not pnl.Entity:LookupBone("ValveBiped.Bip01_Head1") then
-			headPos.z = headPos.z + 20
-		end
-		pnl:SetLookAt(headPos + Vector(0, 0, -10))
-		pnl:SetCamPos(Vector(50, 0, headPos.z - 10))
+		pnl:SetCamPos(Vector(50, 0, headPos.z))
+		pnl:SetLookAt(Vector(0, 0, headPos.z) - Vector(0, 0, 7.5))
 
 
 
