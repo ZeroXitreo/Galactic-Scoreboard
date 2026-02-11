@@ -75,6 +75,7 @@ function component:StatsFromDerived(ply)
 		}
 	}
 
+	// Galactic Orbit
 	if galactic and galactic.pdManager then
 		table.insert(stats, 
 		{
@@ -83,6 +84,18 @@ function component:StatsFromDerived(ply)
 			func = function()
 				if not ply():IsValid() then return "None" end
 				self.PlayTime = os.time() - ply():Info().lastJoin + ply():Info().playTime
+				return string.NiceTime(self.PlayTime)
+			end
+		})
+	// SAM | Admin Mod
+	elseif sam then
+		table.insert(stats, 
+		{
+			stat = "Playtime",
+			important = true,
+			func = function()
+				if not ply():IsValid() then return "None" end
+				self.PlayTime = math.floor(ply():sam_get_play_time())
 				return string.NiceTime(self.PlayTime)
 			end
 		})

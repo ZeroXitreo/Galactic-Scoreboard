@@ -518,11 +518,13 @@ function component:GetRoleList(pnl, ply)
 
 		local roles = {}
 
+		// Galactic Orbit
 		if galactic and galactic.roleManager then
 			for _, role in ipairs(ply():Roles()) do
 				if not role.title then break end
 				table.insert(roles, {title = role.title, color = role.color})
 			end
+		// ULX
 		elseif ulx then
 			for _, team in ipairs(ulx.teams) do
 				for _, group in ipairs(team.groups) do
@@ -531,22 +533,34 @@ function component:GetRoleList(pnl, ply)
 					end
 				end
 			end
+		// SAM | Admin Mod
+		elseif sam then
+			table.insert(roles, {title = ply():GetUserGroup(), color = team.GetColor(ply():Team())})
+		// Default
 		else
 			table.insert(roles, {title = team.GetName(ply():Team()), color = team.GetColor(ply():Team())})
 		end
 
 		for _, role in ipairs(roles) do
-			if not role.title then break end
+			if not role.title then continue end
+
+			// Chip background
 			local txtW, txtH = surface.GetTextSize(role.title:upper())
 			if posX + txtW + galactic.theme.rem / 2 > pnl:GetWide() then
 				posX = 0
 				posY = posY + galactic.theme.rem + galactic.theme.rem / 4
 			end
-			draw.RoundedBox(galactic.theme.round, posX, posY, txtW + galactic.theme.rem / 2, galactic.theme.rem, role.color)
+			draw.RoundedBox(galactic.theme.round, posX, posY, txtW + galactic.theme.rem / 2, galactic.theme.rem, ColorAlpha(role.color, 255 / 5 * 4))
 
-			local txtColor = Color(255, 255, 255)
-			if (role.color.r + role.color.g + role.color.b) / 3 > 155 then
-				txtColor = Color(0, 0, 0)
+			// Chip text
+			local txtColor = role.color
+			local hue, saturation, luminance = ColorToHSL(role.color)
+			local luminanceDifference = .5
+			local saturationDifference = .1
+			if (luminance < .65) then
+				txtColor = HSLToColor(hue, saturation + saturationDifference, luminance + luminanceDifference)
+			else
+				txtColor = HSLToColor(hue, saturation + saturationDifference, luminance - luminanceDifference)
 			end
 			draw.SimpleText(role.title:upper(), "GalacticSubBold", posX + galactic.theme.rem / 4, posY + galactic.theme.rem / 2, txtColor, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
 			posX = posX + txtW + galactic.theme.rem / 2 + galactic.theme.rem / 4
